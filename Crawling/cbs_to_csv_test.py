@@ -20,7 +20,7 @@ print(contents)
 xml = ET.fromstring(contents)
 
 #csv파일 열기
-csv_file = open("data2.csv", 'w', encoding='utf-8-sig')
+csv_file = open("../data2.csv", 'w', encoding='utf-8-sig')
 
 csv_file_writer = csv.writer(csv_file)
 csv_file_writer.writerow(["create_date", "location_id", "location_name", "md101_sn", "msg", "send_platform"])

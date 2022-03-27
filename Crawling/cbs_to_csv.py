@@ -30,7 +30,7 @@ for node in xml:
 pages = math.ceil(int(count)/1000)
 print(pages)
 #csv파일 열기
-csv_file = open("data.csv", 'w', encoding='utf-8-sig')
+csv_file = open("../data.csv", 'w', encoding='utf-8-sig')
 csv_file_writer = csv.writer(csv_file)
 csv_file_writer.writerow(["create_date", "location_id", "location_name", "md101_sn", "msg", "send_platform"])
 
