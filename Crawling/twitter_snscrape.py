@@ -67,15 +67,21 @@ for i,tweet in enumerate(
         id = str(tweet.id)
         user = str(tweet.user.username)
         tweets = str(tweet.content)
+        #hashtag = tweet.hashtags
         hashtag = str(tweet.hashtags)
+
+
         place = str(tweet.place)
         print(type(hashtag))
         print(hashtag)
 
-        conn.query("create (a1:Twitter {date: '" + date + "', id: '" + id + "', user: '" + user + "', tweet: '" + tweets + "', hashtags: 'hashtags', place: 'place'})")
+
+        #conn.query("create (a1:Twitter {date: '" + date + "', id: '" + id + "', user: '" + user + "', tweet: '" + tweets + "', hashtags: 'hashtag', place: 'place'})")
 
         #특정 label 노드 모두 삭제
         #conn.query("match(n: Twitter) detach delete n")
 
         #csvWriter.writerow([tweet.date, tweet.id, tweet.user.username, tweet.content, tweet.hashtags, tweet.place])
 #csvFile.close()
+
+conn.query("Load csv with headers from 'file:///tweets_result_1.csv' as tweets create(a: Twitter {date: tweets.date, id: tweets.id, user: tweets.user, tweets: tweets.content, hashtags: tweets.hashtags, place: tweets.place}) return tweets")
