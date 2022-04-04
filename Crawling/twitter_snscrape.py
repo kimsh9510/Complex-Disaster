@@ -75,7 +75,6 @@ for i,tweet in enumerate(
         print(type(hashtag))
         print(hashtag)
 
-
         #conn.query("create (a1:Twitter {date: '" + date + "', id: '" + id + "', user: '" + user + "', tweet: '" + tweets + "', hashtags: 'hashtag', place: 'place'})")
 
         #특정 label 노드 모두 삭제
