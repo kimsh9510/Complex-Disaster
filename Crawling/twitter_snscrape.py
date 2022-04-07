@@ -1,86 +1,44 @@
 #snscrape로 원하는 keyword 원하는 날짜의 트윗 크롤링
-from neo4j import __version__ as neo4j_version
-from neo4j import GraphDatabase
+#트위터 데이터 csv로 받아온 다음 쿼리입력 - match가 안되어서 포기함
+
 import pandas as pd
 import numpy as np
 import snscrape.modules.twitter as sntwitter
 import csv
-import matplotlib.pyplot as plt
 from datetime import datetime
-
-print(neo4j_version)
-
-#neo4j class 생성
-class Neo4jConnection:
-
-    def __init__(self, uri, user, pwd):
-        self.__uri = uri
-        self.__user = user
-        self.__pwd = pwd
-        self.__driver = None
-        try:
-            self.__driver = GraphDatabase.driver(self.__uri, auth=(self.__user, self.__pwd))
-        except Exception as e:
-            print("Failed to create the driver:", e)
-
-    def close(self):
-        if self.__driver is not None:
-            self.__driver.close()
-
-    def query(self, query, db=None):
-        assert self.__driver is not None, "Driver not initialized!"
-        session = None
-        response = None
-        try:
-            session = self.__driver.session(database=db) if db is not None else self.__driver.session()
-            response = list(session.run(query))
-        except Exception as e:
-            print("Query failed:", e)
-        finally:
-            if session is not None:
-                session.close()
-        return response
+from konlpy.tag import Okt
+from database import conn
 
 # Set maximum tweets to pull
 maxTweets = 9
 # Set what keywords you want your twitter scraper to pull
 keyword = '코로나'
-#since = '2021-10-06'
-#until = '2021-10-07'
-#Open/create a file to append data to
-#english crawling
+tagger = Okt()
 
-#csvFile = open('tweets_result_1.csv', 'w', newline='', encoding='utf-8-sig')
+csvFile = open('tweets_result_1.csv', 'w', newline='', encoding='utf-8-sig')
 #Use csv writer
-#csvWriter = csv.writer(csvFile)
-#csvWriter.writerow(['date','id','user','tweet','hashtags','place'])
-
-conn = Neo4jConnection(uri="bolt://localhost:7687", user="kimsh9510", pwd="sork")
+csvWriter = csv.writer(csvFile)
+csvWriter.writerow(['date','id','user','twitter_context','hashtags','place'])
 
 # Write tweets into the csv file
 for i,tweet in enumerate(
-        #sntwitter.TwitterSearchScraper(keyword + ' lang:ko since:'+ since + 'until:' + until +' -filter:links -filter:replies').get_items()):
         sntwitter.TwitterSearchScraper(keyword + 'since:2022-03-27 until:2022-03-28').get_items()):
         if i > maxTweets :
             break
-        date = tweet.date.strftime("%Y/%m/%d %H:%M:%S")
-        id = str(tweet.id)
-        user = str(tweet.user.username)
         tweets = str(tweet.content)
-        #hashtag = tweet.hashtags
-        hashtag = str(tweet.hashtags)
+        csvWriter.writerow([tweet.date, tweet.id, tweet.user.username, tweets, tweet.hashtags, tweet.place])
+
+        noun_list = tagger.nouns(tweets)
+        #for keyword in noun_list:
+                #키워드 노드 생성
+                #conn.query("create (a4:KEYWORD {tweet: '" + tweets + "', keyword: '" + keyword + "'})")
+
+csvFile.close()
+
+# 트위터 노드 생성
+#conn.query("Load csv with headers from 'file:///tweets_result_1.csv' as A create(a3: TWITTER {date: A.date, id: A.id, user: A.user, tweets: A.twitter_context, hashtags: A.hashtags, place: A.place}) return A")
 
 
-        place = str(tweet.place)
-        print(type(hashtag))
-        print(hashtag)
-
-        #conn.query("create (a1:Twitter {date: '" + date + "', id: '" + id + "', user: '" + user + "', tweet: '" + tweets + "', hashtags: 'hashtag', place: 'place'})")
-
-        #특정 label 노드 모두 삭제
-        #conn.query("match(n: Twitter) detach delete n")
-
-        #csvWriter.writerow([tweet.date, tweet.id, tweet.user.username, tweet.content, tweet.hashtags, tweet.place])
-#csvFile.close()
-
-conn.query("Load csv with headers from 'file:///tweets_result_1.csv' as tweets create(a: Twitter {date: tweets.date, id: tweets.id, user: tweets.user, tweets: tweets.content, hashtags: tweets.hashtags, place: tweets.place}) return tweets")
+# 각 트위터 노드와 키워드 노드 간의 match
+#conn.query("match(a3:TWITTER{twitter:'" + tweets + "'}),(a4:KEYWORD{tweet:'" + tweets + "'})create(a3)-[r:keyword2]->(a4)")
+conn.query("Load csv with headers from 'file:///tweets_result_1.csv' as A match(a3: TWITTER {tweets: A.twitter_context}),(a4:KEYWORD{tweet: A.twitter_context})create(a3)-[r:keyword2]->(a4)")

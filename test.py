@@ -1,5 +1,4 @@
-print("haha")
-print("this is branch crawling")
-print("one more branch crawling")
-print("4")
-print("5")
+from Crawling.twitter_snscrape import tweet_crawling
+
+tweet_crawling()
+

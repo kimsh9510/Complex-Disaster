@@ -2,8 +2,12 @@ from database import conn
 import requests
 import xml.etree.ElementTree as ET
 from konlpy.tag import Okt
+from Crawling.twitter_snscrape import tweet_crawling #트위터 값
 
 if __name__ == "__main__":
+
+    #트위터 크롤링
+    #tweet_crawling()
 
     url = 'http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?serviceKey=vBWCvCxW515%2BgkLcMNXIXHBLHaNh9Xa8F8V9TrjFpKFeB0lP7D9%2BwXEIuAttbGQPrND%2BREAx2GIJf5eXoHF%2FdA%3D%3D&pageNo=1&numOfRows=10&type=xml'
     response = requests.get(url)
@@ -20,9 +24,8 @@ if __name__ == "__main__":
         msg = message.find("msg").text  # 내용
         send_platform = message.find("send_platform").text  # 발신처
 
-        #쿼리 입력
+        #CBS 쿼리 입력
         conn.query("create (a1:CBS {date: '"+create_date+"', location_id: '"+location_id+"', location_name: '"+location_name+"', md101_sn: '"+md101_sn+"', msg: '"+msg+"', send_platform: '"+send_platform+"'})")
-        #conn.query("create (a1: CBS {date : '"+create_date+"'})")
         #conn.query("match (a) optional match (a)-[r]-() delete a, r")
 
         #각 msg에 대한 keyword 추출 후 KEYWORD 쿼리 생성
