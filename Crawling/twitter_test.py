@@ -26,16 +26,23 @@ for i,tweet in enumerate(
     id = str(tweet.id)
     user = str(tweet.user.username)
     tweets = str(tweet.content)
-    #hashtag = tweet.hashtags.text
-    #place = str(tweet.place)
+    hashtag = str(tweet.hashtags)
+    #newhashtag = ''.join(char for char in hashtag if char.isalnum())
+    #hashtag ['연천군청']->'연천군청'
+    newhashtag1 = hashtag.strip("[""]")
+    #hashtag '연천군청'->연천군청
+    newhashtag = newhashtag1.replace("'","")
+    place = str(tweet.place)
 
-    conn.query("create (a3:TWITTER {date : '" + date + "', id:'" + id + "', user:'" + user + "', tweet:'" + tweets + "', hashtag:'hashtag', place:'place'})")
+    #기본 노드 생성
+    conn.query("create (a3:TWITTER {date : '" + date + "', id:'" + id + "', user:'" + user + "', tweet:'" + tweets + "', hashtag:'"+newhashtag+"', place:'"+place+"'})")
 
     noun_list = tagger.nouns(tweets)
     for keyword in noun_list:
         #키워드 노드 생성
         conn.query("create (a4:KEYWORD {tweet: '" + tweets + "', keyword: '" + keyword + "'})")
 
+    #기본 노드와 키워드 노드간의 match
     conn.query("match(a3:TWITTER{tweet:'" + tweets + "'}),(a4:KEYWORD{tweet:'" + tweets + "'})create(a3)-[r:keyword2]->(a4)")
 
 
